@@ -1,0 +1,13 @@
+[importlinter]
+root_packages = 
+    llm 
+    agents 
+    ui
+
+[contract:layers]
+name = Enforce clean layering
+type = layers
+layers =
+    llm
+    agents
+    ui
