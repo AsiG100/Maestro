@@ -1,8 +1,11 @@
 import os
 
 from abc import ABC, abstractmethod
+from typing import Dict, List
 from openai import OpenAI
 from dotenv import load_dotenv
+
+from rag.client import RagClient
 
 load_dotenv()
 
@@ -21,6 +24,9 @@ class LLMClient(ABC):
     - Prefer content from the provided context
     - Only respond for the user type you are given. No need to include the user type in your response.
     - If someone ask a question that includes a recommendation for a piece, you can recommend a piece that is related to the question.
+
+    For context, here are specific extracts from the Knowledge Base that might be directly relevant to the user's question:
+    {context}
     """
 
     USER_PROMPT = """The user is a {user_type} comunicate with him in the best way you can and answer the question.
@@ -32,15 +38,28 @@ class LLMClient(ABC):
     {user_question}
     """
 
-    def format_prompt(self, message: str, history: str, user_type: str) -> str:
-        history = [{"role": h["role"], "content": h["content"]} for h in history]
+    def __init__(self, model: str):
+        self.model = model
+        self.rag = RagClient(self.model)
+
+    def _format_prompt(self, system_prompt: str, user_prompt: str, history: str) -> List[Dict]:
         messages = [
-            {"role": "system", "content": self.SYSTEM_PROMPT},
+            {"role": "system", "content": system_prompt},
             *history,
-            {"role": "user", "content": self.USER_PROMPT.format(user_question=message, user_type=user_type)},
+            {"role": "user", "content": user_prompt},
         ]
 
         return messages
+    
+    def _construct_messages(self, question: str, history: str, user_type: str) -> List[Dict]:
+        chunks = self.rag.fetch_context(question, history)
+        context = "\n\n".join(
+            f"Extract from {chunk.metadata['source']}:\n{chunk.page_content}" for chunk in chunks
+        )
+        user_prompt = self.USER_PROMPT.format(user_question=question, user_type=user_type)
+        system_prompt = self.SYSTEM_PROMPT.format(context=context)
+        history = [{"role": h["role"], "content": h["content"]} for h in history]
+        return self._format_prompt(system_prompt, user_prompt, history)
 
     @abstractmethod
     def completations(self, user_question: str, user_type: str) -> str:
@@ -48,12 +67,12 @@ class LLMClient(ABC):
 
 class OpenAILLMClient(LLMClient):
     def __init__(self, model: str):
+        super().__init__()
         base_url = os.getenv("OPENAI_BASE_URL") or "https://api.openai.com/v1"
-        self.model = model
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), base_url=base_url)
 
     def completations(self, history: str, user_question: str, user_type: str):
-        messages = self.format_prompt(user_question, history, user_type)
+        messages = self._construct_messages(user_question, history, user_type)
         try:
             stream = self.client.chat.completions.create(
                 model=self.model,
