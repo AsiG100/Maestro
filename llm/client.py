@@ -24,6 +24,7 @@ class LLMClient(ABC):
     - Prefer content from the provided context
     - Only respond for the user type you are given. No need to include the user type in your response.
     - If someone ask a question that includes a recommendation for a piece, you can recommend a piece that is related to the question.
+    - If someone asks about popsical's concerts, offer to provide a link to the upcoming concerts page
 
     For context, here are specific extracts from the Knowledge Base that might be directly relevant to the user's question:
     {context}
@@ -54,7 +55,7 @@ class LLMClient(ABC):
     def _construct_messages(self, question: str, history: str, user_type: str) -> List[Dict]:
         chunks = self.rag.fetch_context(question, history)
         context = "\n\n".join(
-            f"Extract from {chunk.metadata['source']}:\n{chunk.page_content}" for chunk in chunks
+            f"Data type is {chunk.metadata['type']}:\n{chunk.page_content}" for chunk in chunks
         )
         user_prompt = self.USER_PROMPT.format(user_question=question, user_type=user_type)
         system_prompt = self.SYSTEM_PROMPT.format(context=context)
@@ -67,7 +68,7 @@ class LLMClient(ABC):
 
 class OpenAILLMClient(LLMClient):
     def __init__(self, model: str):
-        super().__init__()
+        super().__init__(model)
         base_url = os.getenv("OPENAI_BASE_URL") or "https://api.openai.com/v1"
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), base_url=base_url)
 

@@ -45,7 +45,7 @@ class RagClient():
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ]
-        response = completion(model=self.MODEL, messages=messages, response_format=RankOrder)
+        response = completion(model=self.model, messages=messages, response_format=RankOrder)
         reply = response.choices[0].message.content
         order = RankOrder.model_validate_json(reply).order
         return [chunks[i - 1] for i in order]

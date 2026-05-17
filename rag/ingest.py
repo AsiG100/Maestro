@@ -1,6 +1,7 @@
 import json
 
 from pathlib import Path
+from typing import List
 from openai import OpenAI
 from litellm import completion
 from dotenv import load_dotenv
@@ -23,8 +24,9 @@ COLLECTION_NAME = "knowledge_base"
 EMBEDDING_MODEL = "text-embedding-3-large"
 KNOWLEDGE_BASE_PATH = Path(__file__).parent / "data"
 AVERAGE_CHUNK_SIZE = 100
+CHUNK_LINE_LIMIT = 1
 WAIT = wait_exponential(multiplier=1, min=10, max=240)
-WORKERS = 3
+WORKERS = 1
 
 openai = OpenAI()
 
@@ -42,7 +44,7 @@ class Chunk(BaseModel):
         description="A few sentences summarizing the content of this chunk to answer common questions"
     )
     original_text: str = Field(
-        description="The original text of this chunk from the provided document, exactly as is, not changed in any way"
+        description="The original text of this chunk from the provided document"
     )
 
     def as_result(self, document):
@@ -57,6 +59,37 @@ class Chunks(BaseModel):
     chunks: list[Chunk]
 
 
+def jsonl_to_markdown(line: str) -> str:
+    """
+    Converts a string containing JSONL data (one JSON object per line)
+    to a Markdown-friendly representation.
+    Each top-level object is displayed as a Markdown section with its fields.
+    """
+    markdown_lines = []
+
+    try:
+        obj = json.loads(line)
+    except Exception:
+        print(f'malformed line: {line}')
+        
+    # Use name as title if present; otherwise, show type or "Entry"
+    title = obj.get("name") or obj.get("type") or "Entry"
+    markdown_lines.append(f"## {title}\n")
+    for k, v in obj.items():
+        if k == "name":
+            continue  # name already used as heading
+        # Format lists nicely
+        if isinstance(v, list):
+            markdown_lines.append(f"**{k}**:\n")
+            for item in v:
+                markdown_lines.append(f"- {item}")
+        else:
+            markdown_lines.append(f"**{k}**: {v}")
+    markdown_lines.append("")  # blank line between entries
+
+    return "\n".join(markdown_lines)
+
+
 def fetch_documents():
     """A homemade version of the LangChain DirectoryLoader"""
 
@@ -64,7 +97,11 @@ def fetch_documents():
 
     for file in KNOWLEDGE_BASE_PATH.glob("*.jsonl"):
         with open(file, "r", encoding="utf-8") as f:
-            documents.append({"type": file.stem, "source": file.as_posix(), "text": f.read()})
+            file_content = f.read()
+            lines = file_content.strip().splitlines()
+            for line in lines:
+                line_markdown = jsonl_to_markdown(line)
+                documents.append({"type": file.stem, "source": file.as_posix(), "text": line_markdown})
 
     print(f"Loaded {len(documents)} documents")
     return documents
@@ -80,12 +117,12 @@ def make_prompt(document):
     A chatbot will use these chunks to answer questions about classical music and Popsical's operations and history, and to help users find the right playlist for them or their child.
     You should divide up the document as you see fit, being sure that the entire document is returned across the chunks - don't leave anything out.
     This document should probably be split into at least {how_many} chunks, but you can have more or less as appropriate, ensuring that there are individual chunks to answer specific questions.
-    There should be overlap between the chunks as appropriate; typically about 25% overlap or about 4 rows of jsonl, so you have the same text in multiple chunks for best retrieval results.
+    There should be overlap between the chunks as appropriate; typically about 25% overlap or about 4 rows of text, so you have the same text in multiple chunks for best retrieval results.
 
-    For each chunk, you should provide a headline, a summary, and the original jsonl chunk.
+    For each chunk, you should provide a headline, a summary, and the original chunk.
     Together your chunks should represent the entire document with overlap.
 
-    Here is the jsonl document:
+    Here is the original text:
 
     {document["text"]}
 
@@ -176,8 +213,8 @@ def visualize_vectors():
     fig.show()
 
 if __name__ == "__main__":
-    documents = fetch_documents()
-    chunks = create_chunks(documents)
-    create_embeddings(chunks)
-    print("Ingestion complete")
+    # documents = fetch_documents()
+    # chunks = create_chunks(documents)
+    # create_embeddings(chunks)
+    # print("Ingestion complete")
     visualize_vectors()
