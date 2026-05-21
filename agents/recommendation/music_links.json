@@ -1,0 +1,92 @@
+{
+  "metadata": {
+    "name": "Popsical Music Recommendation Links",
+    "version": "1.0",
+    "description": "Starter mood-based playlist dataset for the Popsical classical music chatbot. Links are placeholders and should be replaced with real Spotify playlist and YouTube mix URLs.",
+    "link_types": ["spotify_playlist", "youtube_mix"],
+    "intended_use": "Tooling/retrieval layer for recommending classical music by user mood or listening intent."
+  },
+  "bedtime": {
+    "display_name": "Bedtime Classical",
+    "intent_keywords": ["bedtime", "sleep", "sleepy", "lullaby", "night", "relax before bed", "wind down", "nap", "soothing"],
+    "description": "Soft, gentle classical music for winding down, bedtime routines, naps, and quiet evenings.",
+    "recommendations": [
+      {
+        "title": "Popsical Bedtime Classical Playlist",
+        "spotify_playlist": "https://open.spotify.com/playlist/dummy-popsical-bedtime",
+        "youtube_mix": "https://www.youtube.com/@popsicalmusic/playlists?query=bedtime-classical",
+        "suggested_for": "Parents looking for calm music before sleep or nap time.",
+        "sample_pieces": ["Brahms - Lullaby", "Debussy - Clair de lune", "Saint-Saëns - The Swan", "Satie - Gymnopédie No. 1"]
+      }
+    ]
+  },
+  "exciting": {
+    "display_name": "Exciting Classical",
+    "intent_keywords": ["exciting", "dramatic", "big", "epic", "fast", "powerful", "energy", "adventure", "intense"],
+    "description": "Bold and energetic classical music for movement, excitement, big feelings, and dramatic listening moments.",
+    "recommendations": [
+      {
+        "title": "Popsical Exciting Classical Playlist",
+        "spotify_playlist": "https://open.spotify.com/playlist/dummy-popsical-exciting",
+        "youtube_mix": "https://www.youtube.com/@popsicalmusic/playlists?query=exciting-classical",
+        "suggested_for": "Kids who want music that feels adventurous, fast, or dramatic.",
+        "sample_pieces": ["Rossini - William Tell Overture", "Beethoven - Symphony No. 5", "Grieg - In the Hall of the Mountain King", "Vivaldi - Summer, Presto"]
+      }
+    ]
+  },
+  "magical": {
+    "display_name": "Magical Classical",
+    "intent_keywords": ["magical", "fairy", "sparkly", "wonder", "dreamy", "princess", "fantasy", "enchanted", "whimsical"],
+    "description": "Dreamy, sparkling classical music that feels imaginative, fairy-tale-like, and full of wonder.",
+    "recommendations": [
+      {
+        "title": "Popsical Magical Classical Playlist",
+        "spotify_playlist": "https://open.spotify.com/playlist/dummy-popsical-magical",
+        "youtube_mix": "https://www.youtube.com/@popsicalmusic/playlists?query=magical-classical",
+        "suggested_for": "Families looking for music with a fairy-tale, fantasy, or storybook feeling.",
+        "sample_pieces": ["Tchaikovsky - Dance of the Sugar Plum Fairy", "Debussy - Arabesque No. 1", "Mendelssohn - A Midsummer Night's Dream", "Ravel - Mother Goose Suite"]
+      }
+    ]
+  },
+  "calm": {
+    "display_name": "Calm Classical",
+    "intent_keywords": ["calm", "peaceful", "quiet", "gentle", "relax", "soft", "focus", "background", "easy"],
+    "description": "Peaceful classical music for quiet play, focused activities, morning routines, or mellow family time.",
+    "recommendations": [
+      {
+        "title": "Popsical Calm Classical Playlist",
+        "spotify_playlist": "https://open.spotify.com/playlist/dummy-popsical-calm",
+        "youtube_mix": "https://www.youtube.com/@popsicalmusic/playlists?query=calm-classical",
+        "suggested_for": "Quiet play, drawing, reading, or peaceful background listening.",
+        "sample_pieces": ["Bach - Air on the G String", "Mozart - Eine kleine Nachtmusik, Romance", "Massenet - Meditation from Thaïs", "Dvořák - Songs My Mother Taught Me"]
+      }
+    ]
+  },
+  "fun": {
+    "display_name": "Fun Classical",
+    "intent_keywords": ["fun", "silly", "play", "kids", "dance", "happy", "bouncy", "party", "movement"],
+    "description": "Playful classical music for dancing, moving, laughing, and introducing kids to classical music in a joyful way.",
+    "recommendations": [
+      {
+        "title": "Popsical Fun Classical Playlist",
+        "spotify_playlist": "https://open.spotify.com/playlist/dummy-popsical-fun",
+        "youtube_mix": "https://www.youtube.com/@popsicalmusic/playlists?query=fun-classical",
+        "suggested_for": "Families who want upbeat, kid-friendly classical music for playtime.",
+        "sample_pieces": ["Mozart - Turkish March", "Offenbach - Can Can", "Strauss II - Tritsch-Tratsch Polka", "Saint-Saëns - Fossils"]
+      }
+    ]
+  },
+  "fallback": {
+    "display_name": "Starter Classical Picks",
+    "description": "Use when the user asks for music but does not specify a clear mood.",
+    "recommendations": [
+      {
+        "title": "Popsical Starter Classical Playlist",
+        "spotify_playlist": "https://open.spotify.com/playlist/dummy-popsical-starter",
+        "youtube_mix": "https://www.youtube.com/@popsicalmusic/playlists?query=starter-classical",
+        "suggested_for": "A first classical playlist for families and young children.",
+        "sample_pieces": ["Vivaldi - Spring", "Mozart - Eine kleine Nachtmusik", "Tchaikovsky - Waltz of the Flowers", "Saint-Saëns - Carnival of the Animals"]
+      }
+    ]
+  }
+}

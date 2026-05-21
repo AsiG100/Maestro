@@ -1,6 +1,10 @@
+from abc import ABC, abstractmethod
 import logging
 
-class Agent:
+class AgentError(Exception):
+    pass
+
+class Agent(ABC):
     """
     An abstract superclass for Agents
     Used to log messages in a way that can identify each Agent
@@ -31,3 +35,4 @@ class Agent:
         color_code = self.BG_BLACK + self.color
         message = f"[{self.name}] {message}"
         logging.info(color_code + message + self.RESET)
+    
