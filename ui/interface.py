@@ -37,6 +37,7 @@ class ChatUserInterface(UserInterface):
                 ["What should my child listen to before bed?"],
                 ["Who is Mozart?"],
                 ["Give me a fun classical music fact!"],
+                ["Can you recommend a playlist for beginners?"],
             ],
             flagging_mode="never",
         )
@@ -53,15 +54,6 @@ class ChatUserInterface(UserInterface):
             user_question=message,
             user_type=self.user_type,
         )
-
-        # while response.finish_reason == "tool_calls":
-        #     msg = response.message
-        #     tool_responses = self.handle_tool_calls(msg)
-        #     response = openai.chat.completions.create(
-        #         model=MODEL_CLAUDE,
-        #         messages=messages,
-        #         tools=tools,
-        #     )
 
         result = ""
         for chunk in stream_response:

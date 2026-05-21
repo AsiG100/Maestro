@@ -1,3 +1,4 @@
+from logging import Logger
 import os
 
 from abc import ABC, abstractmethod
@@ -5,6 +6,7 @@ from typing import Dict, List
 from openai import OpenAI
 from dotenv import load_dotenv
 
+from agents.planning_agent import PlanningAgent
 from rag.client import RagClient
 
 load_dotenv()
@@ -71,16 +73,50 @@ class OpenAILLMClient(LLMClient):
         super().__init__(model)
         base_url = os.getenv("OPENAI_BASE_URL") or "https://api.openai.com/v1"
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), base_url=base_url)
+        self.planning_agent = PlanningAgent()
+
+    @staticmethod
+    def _construct_assistant_message(tool_calls) -> Dict:
+        return {
+            "role": "assistant",
+            "content": None,
+            "tool_calls": [
+                {
+                    "id": tc.id,
+                    "type": "function",
+                    "function": {
+                        "name": tc.function.name,
+                        "arguments": tc.function.arguments or "",
+                    },
+                }
+                for tc in tool_calls
+            ],
+        }
 
     def completations(self, history: str, user_question: str, user_type: str):
         messages = self._construct_messages(user_question, history, user_type)
         try:
-            stream = self.client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                stream=True,
-            )
+            done = False
+            while not done:
+                stream = self.client.chat.completions.create(
+                    model=self.model,
+                    messages=messages,
+                    stream=True,
+                    tools=self.planning_agent.get_tools()
+                )
+                
+                first_chunk = next(stream)
+                if first_chunk.choices[0].delta.tool_calls:
+                    tool_calls = first_chunk.choices[0].delta.tool_calls
+                    results = self.planning_agent.handle_tool_call(tool_calls)
+                    messages.append(self._construct_assistant_message(tool_calls))
+                    messages.extend(results)
+         
+                else:
+                    done = True
         except Exception as e:
+            logger = Logger()
+            logger.log(str(e))
             raise LLMError(str(e))
         
         return stream
